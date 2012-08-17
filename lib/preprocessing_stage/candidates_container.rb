@@ -5,6 +5,7 @@ class PreprocessingStage::CandidatesContainer
   include ScoreFunction
   attr_accessor :tags , :article ,  :candidates
   
+#   Create Container of candidates match this article
   def initialize(article)
   @article = Arabic.normalize(article)
   @tags = SolarPage.get_matched_tags(article)|| []
@@ -27,7 +28,7 @@ class PreprocessingStage::CandidatesContainer
       @candidates.each do |c|
         puts "#{c.title} #{c.score}" 
       end
-
-      return @candidates 
+      return @candidates
   end
+
 end

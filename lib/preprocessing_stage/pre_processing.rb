@@ -12,13 +12,9 @@ def self.linkProbabilityProcess
   link_occure = PreprocessingStage::LinkProbability.calculate_link_occure #label:{[label,title] => #OfOccur}
   puts "End calculate_link_occure"
   
-  # puts link_occure
-  
   puts "Start calculate_text_occure"
   labels=extract_lables link_occure
-  
   text_occure=PreprocessingStage::LinkProbability.calculate_text_occure labels #{text =>#OfOccur}
-  #call calculate_text_occure functions with teh keys stored in array
   puts "End calculate_text_occure"
   
   puts "Start save_link_probability_table"
@@ -31,6 +27,7 @@ def self.linkProbabilityProcess
   
 end
 
+#extract lables from the link_occure keys which is [lable,title] 
 def self.extract_lables link_occure
  # we need only the labels to build the trie
   labels=[]
@@ -85,10 +82,12 @@ end
    ## drop sysnonums1 && synonyms2 
  end
  
+#download_import_new_version
 def self.download_import_new_version
    puts `#{RAILS_ROOT}/script/wiki_pages #{DB_USER} #{DB_PASSWORD} #{DOWNLOAD_PAGE} #{DOWNLOAD_PAGE_LINKS} #{DOWNLOAD_PAGE_REDIRECT} #{DOWNLOAD_XML_FILE} #{DATABSE_NAME} #{HOST} #{CURRENT_ENV_ID} `
 end
 
+#reindex_tags 
 def self.reindex_tags
     puts `#{RAILS_ROOT}/script/solr_reindex #{CURRENT_ENV_ID} #{OTHER_ENV_ID} #{THIN_CONFIG} #{OTHER_THIN_CONFIG}`
   end
@@ -144,26 +143,33 @@ def self.reindex_tags
    SolarPage.delete_all
  end
  
- def self.pre_processing  # start calculating preprocessing operations
-        drop_All
-        download_import_new_version
-        # puts "Finish download_import_new_version"
-        reindex_tags 
-        ActiveRecord::Base.connection.execute(SOlR_PAGE_TABLE)
-        synonymsFirstJoin
-        synonymsSecondtJoin
-        combineSynonyms
-        combineDisambiguation
-        linkProbabilityProcess
-        ActiveRecord::Base.connection.execute(JOIN_LINK_PROB_WITH_PAGE)
-        combine_link_prob
-        insert_to_solar
-        insert_english_form 
-        calcaulate_insert_ingoing_outgoing_links
-        
-        ## special cases
-        # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_SYNONYMS_TO_DIAMBIGS)
-        # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_DISAMBIG_SYNONYMS_TO_DIAMBIGS)
-        # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_DISAMBIG_TO_SYNONYMS)
- end  
+def self.pre_processing  # start calculating preprocessing operations
+#drop all tables if any found         
+  drop_All
+  puts "download_import_new_version"
+  download_import_new_version
+  puts "reindex_tags"
+  reindex_tags 
+  ActiveRecord::Base.connection.execute(SOlR_PAGE_TABLE)
+  synonymsFirstJoin
+  synonymsSecondtJoin
+  combineSynonyms
+  combineDisambiguation
+  linkProbabilityProcess
+  ActiveRecord::Base.connection.execute(JOIN_LINK_PROB_WITH_PAGE)
+  puts "combine link probability table"
+  combine_link_prob
+  puts "insert into solr"
+  insert_to_solar
+  puts "insert english form"
+  insert_english_form 
+  puts "calcaulate && insert ingoing &&outgoing links"
+  calcaulate_insert_ingoing_outgoing_links
+  
+  ## special cases
+  # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_SYNONYMS_TO_DIAMBIGS)
+  # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_DISAMBIG_SYNONYMS_TO_DIAMBIGS)
+  # ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_DISAMBIG_TO_SYNONYMS)
+end
+  
 end

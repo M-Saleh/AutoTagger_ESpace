@@ -2,7 +2,9 @@
 require 'nokogiri'
 require 'preprocessing_stage/arabic_normalizer'
 
-#XML_FILE = File.join('', "#{RAILS_ROOT}/arwiki-latest-pages-articles.xml")
+#Some CONSTANTs
+ 
+XML_FILE = File.join('', "#{::Rails.root}/arwiki-latest-pages-articles.xml")
 
 LINK_PATTERN = /\[\[([^\[\]:]*)\]\]/
 ENGLISH_FORM_PATTERN = /\[\[en:(.*)\]\]/
@@ -32,6 +34,9 @@ HOST='localhost'
 THIN_CONFIG= ''
 OTHER_THIN_CONFIG = ''
 
+
+#Some SQL Statments
+  
 CREATE_TABLE_Synonyms2=<<EOF
  CREATE TABLE Synonyms2 ( rd_from  int(8) unsigned NOT NULL DEFAULT '0', title varbinary(255) NOT NULL DEFAULT '', rd_title varbinary(255) NOT NULL DEFAULT '', PRIMARY KEY (`rd_from`) );
 EOF
@@ -203,9 +208,11 @@ end
 def drop_link_prob_table_if_exist
 ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS link_prop;")
 end
+
 def drop_solr_page_tmp2_table_if_exist
 ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS solr_page_tmp2;")
 end
+
 def drop_solr_page_tmp_if_exist
 ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS solr_page_tmp;")
 end

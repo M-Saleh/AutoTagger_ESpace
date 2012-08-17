@@ -7,18 +7,22 @@ def self.parse_XML_file
   reader = Nokogiri::XML::Reader(File.open(XML_FILE))
 end
 
+# return True/False which indecate to if this title should be discarded or not 
 def self.ignore_page_from_title title
   TITLE_IGNORE.each do |pat|
     break [] if pat.match(title)
   end.empty?
 end
 
+# return True/False which indecate to if this text should be discarded or not
 def self.ignore_page_from_text text
   TEXT_IGNORE.each do |pat|
     break [] if pat.match(text)
   end.empty?
 end
-    
+
+#this Function loop over the XML File reader and extract each page with its id,title and text
+#then call block of code wich pass to it as a parameter       
 def self.get_all_pages &blk
   all, processed = 0, 0
   reader = parse_XML_file
@@ -49,6 +53,7 @@ def self.get_all_pages &blk
       # process the page
       processed +=1
       print '.'
+      # call passing code with this page
       blk.call(doc)
       break
       end
@@ -57,6 +62,8 @@ def self.get_all_pages &blk
   puts "Pages Stats: All=#{all}, Processed=#{processed}, Skipped=#{all-processed}"
 end
 
+#calculate link occure function: calculate number of occurrence 
+# for each link lable in all pages text 
 def self.calculate_link_occure
 lableOccurrence = {} # {[label,title] => #OfOccur} 
 get_all_pages do |page|
@@ -82,6 +89,7 @@ def self.extract_anchor_labels_from_text body
   return lables
 end
 
+#split links to anchor text and page title and return 
 def self.split_link link
   page_title, anchor_text = link.split('|')
   return nil if page_title.nil? # Empty
@@ -102,7 +110,9 @@ def self.split_link link
     [a, p]
 end
 
+#calculate text occure (include thr link) for each link lable 
 def self.calculate_text_occure labels_array
+#create instance from Trie class to use it in extract words and compute #Of occurrence
 trie = Trie.new(labels_array)
 
 text_occure={}
@@ -113,6 +123,7 @@ end
 return text_occure
 end
 
+#insert link occure and text occure into link_prob_temp table
 def self.save_link_probability_table link,text
   drop_link_prob_temp_table_if_exist
   create_link_prob_temp_table
@@ -129,6 +140,7 @@ def self.save_link_probability_table link,text
   end
 end
 
+#extract english from for each page if found,then save it into the database 
 def self.extract_save_english_translations
 puts "extract english translations"
 
