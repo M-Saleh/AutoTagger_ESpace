@@ -1,0 +1,113 @@
+#encoding: utf-8
+require 'preprocessing_stage/trie'
+
+class PreprocessingStage::PreProcessing
+include LinkProbability
+
+def self.test
+fun
+end
+
+def self.callLinkProbability
+  
+  puts "Start linkProbabilityTable"
+  
+  puts "Start calculate_link_occure"
+  link_occure=PreprocessingStage::LinkProbability.calculate_link_occure #link_occure:{[label,title] => #OfOccur}
+  puts "End calculate_link_occure"
+  
+  # puts link_occure
+  
+  puts "Start calculate_text_occure"
+  labels=extract_lables link_occure
+  text_occure=PreprocessingStage::LinkProbability.calculate_text_occure labels #{text =>#OfOccur}
+  #call calculate_text_occure functions with teh keys stored in array
+  puts "End calculate_text_occure"
+  
+  puts "Start save_link_probability_table"
+  PreprocessingStage::LinkProbability.save_link_probability_table link_occure,text_occure
+  puts "End save_link_probability_table"
+  
+  puts "Start extract_save_english_translations"
+  PreprocessingStage::LinkProbability.extract_save_english_translations
+  puts "Finish extract_save_english_translations"
+end
+
+def self.extract_lables link_occure
+ # we need only the labels to build the trie
+  labels=[]
+  link_occure.each do |key,val|
+    if (key[0] != nil && key[0].size > 0)
+      labels << key[0]
+    end
+  end
+  return labels 
+end
+ def self.synonymsFirstJoin
+    results = 
+        ActiveRecord::Base.connection.execute(" select rd_from , rd_title , page_id
+            from redirect
+            inner join page 
+            on page_namespace = 0 and  rd_title = page_title
+            ORDER BY rd_from ;")
+    results.each do |r|
+    p = r[1].strip.gsub("\""," ").force_encoding('utf-8')
+    ActiveRecord::Base.connection.execute("insert into Synonyms1 values (#{r[0]}, \"#{p}\"  , #{r[2]});")
+    end        
+  end   
+  
+  
+   def self.synonymsSecondtJoin
+    results = 
+        ActiveRecord::Base.connection.execute(" select * from Synonyms1;")
+    results.each do |r| 
+            results2 = ActiveRecord::Base.connection.execute(" select page_title from page where page_id = #{r[0]};")
+            p = r[1].strip.gsub("\""," ").force_encoding('utf-8')
+            results2.each do |r2|
+                 p2 = r2[0].strip.gsub("\""," ").force_encoding('utf-8')
+                 p2 = p2.strip.gsub("\\"," ").force_encoding('utf-8')
+                 ActiveRecord::Base.connection.execute("insert into Synonyms2 values (#{r[0]}, \"#{p2}\",\"#{p}\"  , #{r[2]});")
+        end
+    end        
+  end   
+  
+  def self.extractDisambiguation
+    results = ActiveRecord::Base.connection.execute(" select page_id , page_title from page where page_namespace = 0 ;")
+     results.each do |r|
+      p_title = r[1].strip.gsub("\""," ").force_encoding('utf-8')
+      if p_title.include? "توضيح"
+            results2 = ActiveRecord::Base.connection.execute(" select pl_title from pagelinks where pl_from = #{r[0]} and pl_namespace = 0;")
+            results2.each do |r2|
+                 pl_title = r2[0].strip.gsub("\""," ").force_encoding('utf-8')
+                 pl_title = pl_title.strip.gsub("\\"," ").force_encoding('utf-8')
+                 ActiveRecord::Base.connection.execute("insert into Disambiguation values (#{r[0]}, \"#{p_title}\",\"#{pl_title}\");")
+            end
+      end 
+    end
+ end 
+
+ def self.combineSynonyms 
+   results = ActiveRecord::Base.connection.execute(" select * from Synonyms2 ;")
+   count = 0
+   results.each do |r|
+    count+=1
+    if count>26622 
+          page_title = r[1].strip.gsub("_"," ").force_encoding('utf-8')
+          s_d_title  = r[2].strip.gsub("_"," ").force_encoding('utf-8')
+          results = ActiveRecord::Base.connection.execute("insert into solr_page_tmp (page_id, page_title, s_d_title, page_type) values (#{r[3]},\"#{page_title}\",\"#{s_d_title}\",1);")
+    end
+   end
+   ## drop sysnonums1 && synonyms2 
+ end
+
+ def self.combineDisambiguation 
+          ActiveRecord::Base.connection.execute(SOLR_PAGE_TABLE_INSERT_DISAMBIGS)
+ 
+ end
+ 
+ def self.combine
+         # ActiveRecord::Base.connection.execute(OlR_PAGE_TABLE)
+        #combineSynonyms
+        combineDisambiguation
+ end  
+end

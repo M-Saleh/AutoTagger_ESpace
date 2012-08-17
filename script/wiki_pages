@@ -1,0 +1,33 @@
+#!/bin/sh
+rake sunspot:solr:start RAILS_ENV=$9
+
+echo "Downloading new dumps...."
+wget $3
+wget $4
+wget $5
+wget $6
+echo "Downloading new dumps done."
+
+echo "Extracting dumps...."
+gunzip 'arwiki-latest-page.sql.gz'
+gunzip 'arwiki-latest-pagelinks.sql.gz'
+gunzip 'arwiki-latest-redirect.sql.gz'
+echo "Extracting dumps done."
+
+echo "importing pages table ...."
+mysql -u$1 -p$2 -h $8 $7 < arwiki-latest-page.sql
+echo "importing pages table done."
+
+echo "importing pages links table ...."
+mysql -u$1 -p$2 -h $8 $7 < arwiki-latest-pagelinks.sql
+echo "importing pages links table done"
+
+echo "importing redirect table ...."
+mysql -u$1 -p$2 -h $8 $7 < arwiki-latest-redirect.sql
+echo "importing redirect table done"
+
+echo "importing tables done."
+
+rm 'arwiki-latest-page.sql'
+rm 'arwiki-latest-pagelinks.sql'
+rm 'arwiki-latest-redirect.sql'

@@ -1,0 +1,14 @@
+<div id ="Tags">
+Final Tags:
+<br>
+<table border="3" >
+  <tr><td>Tag</td></tr>
+  <%@candidates.each do |can|%>
+   <tr><td><%="#{can.title} => #{can.score}"%></td></tr>
+  <%end%>
+</table>
+
+<p> <%=@text%> </p>
+<br>
+<br>
+</div>

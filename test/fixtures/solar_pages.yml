@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  page_id: 1
+  page_title: MyString
+  s_d_title: MyString
+  page_type: 1
+  incoming: 1
+  outgoing: 1
+  en_form: MyString
+  link_occur: 1
+  text_occur: 1
+
+two:
+  page_id: 1
+  page_title: MyString
+  s_d_title: MyString
+  page_type: 1
+  incoming: 1
+  outgoing: 1
+  en_form: MyString
+  link_occur: 1
+  text_occur: 1

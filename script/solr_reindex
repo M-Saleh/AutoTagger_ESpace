@@ -1,0 +1,8 @@
+#!/bin/sh
+#!/usr/local/bin/ruby
+rake sunspot:solr:start RAILS_ENV=$1
+rake sunspot:solr:reindex RAILS_ENV=$1
+rake sunspot:solr:stop RAILS_ENV=$2
+thin stop -C $4
+sleep 5
+thin start -C $3
