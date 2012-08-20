@@ -84,12 +84,12 @@ end
  
 #download_import_new_version
 def self.download_import_new_version
-   puts `#{RAILS_ROOT}/script/wiki_pages #{DB_USER} #{DB_PASSWORD} #{DOWNLOAD_PAGE} #{DOWNLOAD_PAGE_LINKS} #{DOWNLOAD_PAGE_REDIRECT} #{DOWNLOAD_XML_FILE} #{DATABSE_NAME} #{HOST} #{CURRENT_ENV_ID} `
+   puts `#{::Rails.root}/script/wiki_pages #{DB_USER} #{DB_PASSWORD} #{DOWNLOAD_PAGE} #{DOWNLOAD_PAGE_LINKS} #{DOWNLOAD_PAGE_REDIRECT} #{DOWNLOAD_XML_FILE} #{DATABSE_NAME} #{HOST} #{CURRENT_ENV_ID} `
 end
 
 #reindex_tags 
 def self.reindex_tags
-    puts `#{RAILS_ROOT}/script/solr_reindex #{CURRENT_ENV_ID} #{OTHER_ENV_ID} #{THIN_CONFIG} #{OTHER_THIN_CONFIG}`
+    puts `#{::Rails.root}/script/solr_reindex #{CURRENT_ENV_ID} #{OTHER_ENV_ID} #{THIN_CONFIG} #{OTHER_THIN_CONFIG}`
   end
 
  def self.combineDisambiguation 
